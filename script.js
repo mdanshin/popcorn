@@ -21,7 +21,6 @@ let platformX = (width - platformWidth) / 2;
 const platformY = height - 20;
 
 // Шарик
-// Шарик
 const ballRadius = 10;
 let ballX = platformX + platformWidth / 2;
 let ballY = platformY - ballRadius;
@@ -32,7 +31,7 @@ const ballSpeed = 2; // Скорость мяча
 // Блоки
 const numColumns = 10;
 const numRows = 5;
-const blockWidth = 60;
+const blockWidth = 50;
 const blockHeight = 20;
 const blockPadding = 10;
 const blocksOffsetTop = 30;
@@ -46,22 +45,6 @@ let score = 0;
 const maxLives = 3;
 let lives = maxLives;
 
-function startGame() {
-    document.addEventListener('keydown', handleStartGame);
-    document.addEventListener('click', handleStartGame);
-    showMessage('Нажмите любую клавишу или кликните мышкой, чтобы начать');
-}
-
-function handleStartGame() {
-    document.removeEventListener('keydown', handleStartGame);
-    document.removeEventListener('click', handleStartGame);
-    isGameRunning = true;
-    hideMessage();
-    resetGame();
-    gameLoop();
-}
-
-
 // Инициализация массива блоков
 function createBlocks() {
     blocks = new Array(numColumns);
@@ -74,7 +57,6 @@ function createBlocks() {
 }
 
 createBlocks();
-
 
 // Отрисовка блоков
 function drawBlocks() {
@@ -105,20 +87,20 @@ function drawBall() {
     ctx.fillStyle = BLUE;
     ctx.fill();
     ctx.closePath();
-    const ballSpeed = 2; // Скорость мяча
+    const ballSpeed = 3; // Скорость мяча
 
     // Отскок от платформы
-if (ballX + ballRadius > platformX && ballX - ballRadius < platformX + platformWidth &&
-    ballY + ballRadius > platformY) {
-    // Рассчитываем точку попадания мяча на платформу
-    const collisionPoint = ballX - (platformX + platformWidth / 2);
-    // Нормализуем значение точки попадания в диапазон [-1, 1]
-    const normalizedCollisionPoint = collisionPoint / (platformWidth / 2);
-    // Рассчитываем новое направление мяча по горизонтали
-    const angle = normalizedCollisionPoint * Math.PI / 3; // Максимальный угол отскока 60 градусов
-    ballDX = Math.sin(angle) * ballSpeed;
-    ballDY = -Math.cos(angle) * ballSpeed;
-}
+    if (ballX + ballRadius > platformX && ballX - ballRadius < platformX + platformWidth &&
+        ballY + ballRadius > platformY) {
+        // Рассчитываем точку попадания мяча на платформу
+        const collisionPoint = ballX - (platformX + platformWidth / 2);
+        // Нормализуем значение точки попадания в диапазон [-1, 1]
+        const normalizedCollisionPoint = collisionPoint / (platformWidth / 2);
+        // Рассчитываем новое направление мяча по горизонтали
+        const angle = normalizedCollisionPoint * Math.PI / 3; // Максимальный угол отскока 60 градусов
+        ballDX = Math.sin(angle) * ballSpeed;
+        ballDY = -Math.cos(angle) * ballSpeed;
+    }
 }
 
 // Коллизия шарика с блоками
@@ -159,24 +141,37 @@ function drawLives() {
         hearts += '♥ ';
     }
 
-    ctx.fillText('Lives: ' + hearts, width - 80, 20);
+    ctx.fillText('Lives: ' + hearts, width - 100, 20);
 }
 
 // Игровой цикл
 function gameLoop() {
+
     ctx.clearRect(0, 0, width, height);
 
-        // Обработка движения платформы с помощью клавиш или мыши
-        if (keys['ArrowLeft'] || (isMouseMoving && mousePosition.x < platformX)) {
-            if (platformX > 0) {
-                platformX -= 5;
-            }
+    // Отрисовка границ экрана
+    ctx.strokeStyle = BLUE; // Цвет границ
+    ctx.lineWidth = 2; // Толщина границ
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(width, 0);
+    ctx.lineTo(width, height);
+    ctx.lineTo(0, height);
+    ctx.closePath();
+    ctx.stroke();
+
+
+    // Обработка движения платформы с помощью клавиш или мыши
+    if (keys['ArrowLeft'] || (isMouseMoving && mousePosition.x < platformX)) {
+        if (platformX > 0) {
+            platformX -= 5;
         }
-        if (keys['ArrowRight'] || (isMouseMoving && mousePosition.x > platformX + platformWidth)) {
-            if (platformX < width - platformWidth) {
-                platformX += 5;
-            }
+    }
+    if (keys['ArrowRight'] || (isMouseMoving && mousePosition.x > platformX + platformWidth)) {
+        if (platformX < width - platformWidth) {
+            platformX += 5;
         }
+    }
 
     // Обновление позиции шарика
     ballX += ballDX;
@@ -205,9 +200,6 @@ function gameLoop() {
             ballDY = 2;
         }
     }
-
-    
-
 
     // Обработка коллизии шарика с блоками
     ballBlockCollisionDetection();
@@ -238,25 +230,25 @@ const keys = {};
 let mousePosition = { x: 0, y: 0 };
 let isMouseMoving = false;
 
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     keys[event.key] = true;
 });
 
-document.addEventListener('keyup', function(event) {
+document.addEventListener('keyup', function (event) {
     delete keys[event.key];
 });
 
-document.addEventListener('mousemove', function(event) {
+document.addEventListener('mousemove', function (event) {
     const rect = canvas.getBoundingClientRect();
     mousePosition.x = event.clientX - rect.left;
     mousePosition.y = event.clientY - rect.top;
 });
 
-document.addEventListener('mousedown', function(event) {
+document.addEventListener('mousedown', function (event) {
     isMouseMoving = true;
 });
 
-document.addEventListener('mouseup', function(event) {
+document.addEventListener('mouseup', function (event) {
     isMouseMoving = false;
 });
 
