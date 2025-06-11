@@ -127,14 +127,21 @@ function createBricks() {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
             const colors = ['#ff0040', '#ff8000', '#ffff00', '#00ff40', '#0080ff', '#8000ff'];
+            let hits = Math.min(3, Math.floor(row / 2) + 1);
+
+            // На первом уровне все блоки должны разбиваться с первого удара
+            if (level === 1) {
+                hits = 1;
+            }
+
             bricks.push({
                 x: col * (brickWidth + 5) + offsetX,
                 y: row * (brickHeight + 5) + offsetY,
                 width: brickWidth,
                 height: brickHeight,
                 color: colors[row % colors.length],
-                hits: Math.min(3, Math.floor(row / 2) + 1),
-                maxHits: Math.min(3, Math.floor(row / 2) + 1)
+                hits: hits,
+                maxHits: hits
             });
         }
     }
