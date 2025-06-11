@@ -52,18 +52,23 @@ const firebaseConfig = {
     apiKey: "AIzaSyBUuqoIfu_5u9UMfYqrKFBFn-jneaLQh00",
     authDomain: "popcorn-f76f0.firebaseapp.com",
     projectId: "popcorn-f76f0",
-    storageBucket: "popcorn-f76f0.appspot.com",
+    storageBucket: "popcorn-f76f0.firebasestorage.app",
     messagingSenderId: "317921233471",
     appId: "1:317921233471:web:9d758ac6753d867d2e868a",
     measurementId: "G-CHVEDGVLEM"
 };
 
+
 const app = initializeApp(firebaseConfig);
 getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
 onAuthStateChanged(auth, currentUser => {
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+auth.onAuthStateChanged(currentUser => {
     user = currentUser;
     if (user) {
         document.getElementById('loginBtn').style.display = 'none';
@@ -80,12 +85,19 @@ onAuthStateChanged(auth, currentUser => {
 });
 
 function loginWithGoogle() {
+
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider).catch(console.error);
 }
 
 function logout() {
     signOut(auth);
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(console.error);
+}
+
+function logout() {
+    auth.signOut();
 }
 
 function loadHighScore() {
@@ -96,6 +108,8 @@ function loadHighScore() {
     }).catch(err => {
         console.error(err);
         highScore = parseInt(localStorage.getItem('highScore')) || 0;
+    db.collection('users').doc(user.uid).get().then(doc => {
+        highScore = doc.exists ? (doc.data().highScore || 0) : 0;
         updateHighScoreUI();
     });
 }
@@ -103,6 +117,7 @@ function loadHighScore() {
 function saveHighScore() {
     if (user) {
         setDoc(doc(db, 'users', user.uid), { highScore }).catch(console.error);
+        db.collection('users').doc(user.uid).set({ highScore });
     } else {
         localStorage.setItem('highScore', highScore);
     }
