@@ -40,6 +40,11 @@ let lives = 3;
 let keys = {};
 
 // Firebase authentication and database
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js';
+import { getAnalytics } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js';
+
 let user = null;
 let highScore = 0;
 
@@ -53,6 +58,12 @@ const firebaseConfig = {
     measurementId: "G-CHVEDGVLEM"
 };
 
+
+const app = initializeApp(firebaseConfig);
+getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+onAuthStateChanged(auth, currentUser => {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -74,6 +85,13 @@ auth.onAuthStateChanged(currentUser => {
 });
 
 function loginWithGoogle() {
+
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider).catch(console.error);
+}
+
+function logout() {
+    signOut(auth);
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch(console.error);
 }
@@ -84,6 +102,12 @@ function logout() {
 
 function loadHighScore() {
     if (!user) return;
+    getDoc(doc(db, 'users', user.uid)).then(snapshot => {
+        highScore = snapshot.exists() ? (snapshot.data().highScore || 0) : 0;
+        updateHighScoreUI();
+    }).catch(err => {
+        console.error(err);
+        highScore = parseInt(localStorage.getItem('highScore')) || 0;
     db.collection('users').doc(user.uid).get().then(doc => {
         highScore = doc.exists ? (doc.data().highScore || 0) : 0;
         updateHighScoreUI();
@@ -92,6 +116,7 @@ function loadHighScore() {
 
 function saveHighScore() {
     if (user) {
+        setDoc(doc(db, 'users', user.uid), { highScore }).catch(console.error);
         db.collection('users').doc(user.uid).set({ highScore });
     } else {
         localStorage.setItem('highScore', highScore);
@@ -647,3 +672,10 @@ function toggleSound() {
 
 // Запуск игрового цикла
 gameLoop();
+
+// Экспорт функций для использования в HTML
+window.startGame = startGame;
+window.restartGame = restartGame;
+window.toggleSound = toggleSound;
+window.loginWithGoogle = loginWithGoogle;
+window.logout = logout;
