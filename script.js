@@ -39,6 +39,84 @@ let level = 1;
 let lives = 3;
 let keys = {};
 
+// Firebase authentication and database
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js';
+import { getAnalytics } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js';
+
+let user = null;
+let highScore = 0;
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBUuqoIfu_5u9UMfYqrKFBFn-jneaLQh00",
+    authDomain: "popcorn-f76f0.firebaseapp.com",
+    projectId: "popcorn-f76f0",
+    storageBucket: "popcorn-f76f0.appspot.com",
+    messagingSenderId: "317921233471",
+    appId: "1:317921233471:web:9d758ac6753d867d2e868a",
+    measurementId: "G-CHVEDGVLEM"
+};
+
+const app = initializeApp(firebaseConfig);
+getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+onAuthStateChanged(auth, currentUser => {
+    user = currentUser;
+    if (user) {
+        document.getElementById('loginBtn').style.display = 'none';
+        const logoutBtn = document.getElementById('logoutBtn');
+        logoutBtn.style.display = 'inline-block';
+        logoutBtn.textContent = `ВЫЙТИ (${user.displayName})`;
+        loadHighScore();
+    } else {
+        document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('loginBtn').style.display = 'inline-block';
+        highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        updateHighScoreUI();
+    }
+});
+
+function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider).catch(console.error);
+}
+
+function logout() {
+    signOut(auth);
+}
+
+function loadHighScore() {
+    if (!user) return;
+    getDoc(doc(db, 'users', user.uid)).then(snapshot => {
+        highScore = snapshot.exists() ? (snapshot.data().highScore || 0) : 0;
+        updateHighScoreUI();
+    }).catch(err => {
+        console.error(err);
+        highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        updateHighScoreUI();
+    });
+}
+
+function saveHighScore() {
+    if (user) {
+        setDoc(doc(db, 'users', user.uid), { highScore }).catch(console.error);
+    } else {
+        localStorage.setItem('highScore', highScore);
+    }
+}
+
+function updateHighScoreUI() {
+    document.getElementById('highScore').textContent = highScore;
+    document.getElementById('finalHighScore').textContent = `Рекорд: ${highScore}`;
+}
+
+// Начальная загрузка рекорда для гостей
+highScore = parseInt(localStorage.getItem('highScore')) || 0;
+updateHighScoreUI();
+
 // Инициализация аудио
 function initAudio() {
     if (!audioContext) {
@@ -391,6 +469,11 @@ function gameOver() {
     gameRunning = false;
     playGameOverSound();
     document.getElementById('finalScore').textContent = `Ваш счёт: ${score}`;
+    if (score > highScore) {
+        highScore = score;
+        saveHighScore();
+    }
+    updateHighScoreUI();
     document.getElementById('gameOverScreen').style.display = 'flex';
 }
 
@@ -551,6 +634,8 @@ function startGame() {
     score = 0;
     level = 1;
     lives = 3;
+
+    updateHighScoreUI();
     
     createBricks();
     resetBall();
@@ -572,3 +657,10 @@ function toggleSound() {
 
 // Запуск игрового цикла
 gameLoop();
+
+// Экспорт функций для использования в HTML
+window.startGame = startGame;
+window.restartGame = restartGame;
+window.toggleSound = toggleSound;
+window.loginWithGoogle = loginWithGoogle;
+window.logout = logout;
