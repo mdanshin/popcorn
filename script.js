@@ -188,6 +188,52 @@ function createPowerUp(x, y) {
     }
 }
 
+// Вспомогательная функция для скруглённых прямоугольников
+function roundRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+}
+
+// Красивое отображение бонусов
+function drawPowerUp(powerUp) {
+    const { x, y, width, height, type, color } = powerUp;
+
+    const grad = ctx.createLinearGradient(x, y, x, y + height);
+    grad.addColorStop(0, color);
+    grad.addColorStop(1, '#002');
+    ctx.fillStyle = grad;
+    roundRect(ctx, x, y, width, height, 4);
+    ctx.fill();
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const symbols = {
+        expand: '⤢',
+        multiball: '⚪',
+        slow: '🐢',
+        fast: '⏩'
+    };
+
+    const symbol = symbols[type] || '?';
+    ctx.fillText(symbol, x + width / 2, y + height / 2);
+}
+
 // Обработка столкновений
 function checkCollisions() {
     // Столкновение с краями
@@ -414,19 +460,7 @@ function draw() {
 
     // Отрисовка бонусов
     powerUps.forEach(powerUp => {
-        ctx.fillStyle = powerUp.color;
-        ctx.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
-        ctx.strokeStyle = '#ffffff';
-        ctx.strokeRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
-        
-        // Символ бонуса
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '14px Orbitron';
-        ctx.textAlign = 'center';
-        const symbol = powerUp.type === 'expand' ? '+' : 
-                      powerUp.type === 'slow' ? 'S' : 
-                      powerUp.type === 'fast' ? 'F' : '•';
-        ctx.fillText(symbol, powerUp.x + powerUp.width/2, powerUp.y + powerUp.height/2 + 4);
+        drawPowerUp(powerUp);
     });
 
     // Отрисовка частиц
