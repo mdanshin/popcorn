@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARCANOID 90s</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div id="gameContainer">
@@ -14,6 +17,7 @@
             <div>СЧЁТ: <span id="score">0</span></div>
             <div>УРОВЕНЬ: <span id="level">1</span></div>
             <div>ЖИЗНИ: <span id="lives">3</span></div>
+            <div>РЕКОРД: <span id="highScore">0</span></div>
         </div>
 
         <div id="startScreen">
@@ -25,11 +29,14 @@
             </div>
             <button class="btn" onclick="startGame()">НАЧАТЬ ИГРУ</button>
             <button class="btn" onclick="toggleSound()">ЗВУК: ВКЛ</button>
+            <button class="btn" id="loginBtn" onclick="loginWithGoogle()">ВОЙТИ С GOOGLE</button>
+            <button class="btn" id="logoutBtn" onclick="logout()" style="display:none;">ВЫЙТИ</button>
         </div>
 
         <div id="gameOverScreen" style="display: none;">
             <h1>ИГРА ОКОНЧЕНА</h1>
             <div id="finalScore"></div>
+            <div id="finalHighScore"></div>
             <button class="btn" onclick="restartGame()">ИГРАТЬ СНОВА</button>
         </div>
     </div>

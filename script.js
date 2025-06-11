@@ -39,6 +39,74 @@ let level = 1;
 let lives = 3;
 let keys = {};
 
+// Firebase authentication and database
+let user = null;
+let highScore = 0;
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBUuqoIfu_5u9UMfYqrKFBFn-jneaLQh00",
+    authDomain: "popcorn-f76f0.firebaseapp.com",
+    projectId: "popcorn-f76f0",
+    storageBucket: "popcorn-f76f0.firebasestorage.app",
+    messagingSenderId: "317921233471",
+    appId: "1:317921233471:web:9d758ac6753d867d2e868a",
+    measurementId: "G-CHVEDGVLEM"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+auth.onAuthStateChanged(currentUser => {
+    user = currentUser;
+    if (user) {
+        document.getElementById('loginBtn').style.display = 'none';
+        const logoutBtn = document.getElementById('logoutBtn');
+        logoutBtn.style.display = 'inline-block';
+        logoutBtn.textContent = `ВЫЙТИ (${user.displayName})`;
+        loadHighScore();
+    } else {
+        document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('loginBtn').style.display = 'inline-block';
+        highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        updateHighScoreUI();
+    }
+});
+
+function loginWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(console.error);
+}
+
+function logout() {
+    auth.signOut();
+}
+
+function loadHighScore() {
+    if (!user) return;
+    db.collection('users').doc(user.uid).get().then(doc => {
+        highScore = doc.exists ? (doc.data().highScore || 0) : 0;
+        updateHighScoreUI();
+    });
+}
+
+function saveHighScore() {
+    if (user) {
+        db.collection('users').doc(user.uid).set({ highScore });
+    } else {
+        localStorage.setItem('highScore', highScore);
+    }
+}
+
+function updateHighScoreUI() {
+    document.getElementById('highScore').textContent = highScore;
+    document.getElementById('finalHighScore').textContent = `Рекорд: ${highScore}`;
+}
+
+// Начальная загрузка рекорда для гостей
+highScore = parseInt(localStorage.getItem('highScore')) || 0;
+updateHighScoreUI();
+
 // Инициализация аудио
 function initAudio() {
     if (!audioContext) {
@@ -391,6 +459,11 @@ function gameOver() {
     gameRunning = false;
     playGameOverSound();
     document.getElementById('finalScore').textContent = `Ваш счёт: ${score}`;
+    if (score > highScore) {
+        highScore = score;
+        saveHighScore();
+    }
+    updateHighScoreUI();
     document.getElementById('gameOverScreen').style.display = 'flex';
 }
 
@@ -551,6 +624,8 @@ function startGame() {
     score = 0;
     level = 1;
     lives = 3;
+
+    updateHighScoreUI();
     
     createBricks();
     resetBall();
