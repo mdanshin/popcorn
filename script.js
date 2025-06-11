@@ -47,7 +47,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyBUuqoIfu_5u9UMfYqrKFBFn-jneaLQh00",
     authDomain: "popcorn-f76f0.firebaseapp.com",
     projectId: "popcorn-f76f0",
-    storageBucket: "popcorn-f76f0.firebasestorage.app",
+    storageBucket: "popcorn-f76f0.appspot.com",
     messagingSenderId: "317921233471",
     appId: "1:317921233471:web:9d758ac6753d867d2e868a",
     measurementId: "G-CHVEDGVLEM"
@@ -87,12 +87,16 @@ function loadHighScore() {
     db.collection('users').doc(user.uid).get().then(doc => {
         highScore = doc.exists ? (doc.data().highScore || 0) : 0;
         updateHighScoreUI();
+    }).catch(err => {
+        console.error(err);
+        highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        updateHighScoreUI();
     });
 }
 
 function saveHighScore() {
     if (user) {
-        db.collection('users').doc(user.uid).set({ highScore });
+        db.collection('users').doc(user.uid).set({ highScore }).catch(console.error);
     } else {
         localStorage.setItem('highScore', highScore);
     }
