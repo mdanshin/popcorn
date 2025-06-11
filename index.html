@@ -1,11 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Arkanoid</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCANOID 90s</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div id="ui">
+            <div>СЧЁТ: <span id="score">0</span></div>
+            <div>УРОВЕНЬ: <span id="level">1</span></div>
+            <div>ЖИЗНИ: <span id="lives">3</span></div>
+        </div>
+
+        <div id="startScreen">
+            <h1>ARCANOID</h1>
+            <div id="instructions">
+                <p>УПРАВЛЕНИЕ: ← → или A D</p>
+                <p>РАЗБИВАЙТЕ БЛОКИ И НЕ ДАЙТЕ ШАРУ УПАСТЬ!</p>
+                <p>СОБИРАЙТЕ БОНУСЫ ДЛЯ УСИЛЕНИЯ!</p>
+            </div>
+            <button class="btn" onclick="startGame()">НАЧАТЬ ИГРУ</button>
+            <button class="btn" onclick="toggleSound()">ЗВУК: ВКЛ</button>
+        </div>
+
+        <div id="gameOverScreen" style="display: none;">
+            <h1>ИГРА ОКОНЧЕНА</h1>
+            <div id="finalScore"></div>
+            <button class="btn" onclick="restartGame()">ИГРАТЬ СНОВА</button>
+        </div>
+    </div>
     <script src="script.js"></script>
+
 </body>
 </html>
