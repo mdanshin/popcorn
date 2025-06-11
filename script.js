@@ -108,9 +108,10 @@ function loadHighScore() {
     }).catch(err => {
         console.error(err);
         highScore = parseInt(localStorage.getItem('highScore')) || 0;
-    db.collection('users').doc(user.uid).get().then(doc => {
-        highScore = doc.exists ? (doc.data().highScore || 0) : 0;
-        updateHighScoreUI();
+        db.collection('users').doc(user.uid).get().then(doc => {
+            highScore = doc.exists ? (doc.data().highScore || 0) : 0;
+            updateHighScoreUI();
+        });
     });
 }
 
