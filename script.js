@@ -64,11 +64,6 @@ getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 onAuthStateChanged(auth, currentUser => {
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-auth.onAuthStateChanged(currentUser => {
     user = currentUser;
     if (user) {
         document.getElementById('loginBtn').style.display = 'none';
@@ -92,12 +87,6 @@ function loginWithGoogle() {
 
 function logout() {
     signOut(auth);
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(console.error);
-}
-
-function logout() {
-    auth.signOut();
 }
 
 function loadHighScore() {
@@ -108,17 +97,13 @@ function loadHighScore() {
     }).catch(err => {
         console.error(err);
         highScore = parseInt(localStorage.getItem('highScore')) || 0;
-        db.collection('users').doc(user.uid).get().then(doc => {
-            highScore = doc.exists ? (doc.data().highScore || 0) : 0;
-            updateHighScoreUI();
-        });
+        updateHighScoreUI();
     });
 }
 
 function saveHighScore() {
     if (user) {
         setDoc(doc(db, 'users', user.uid), { highScore }).catch(console.error);
-        db.collection('users').doc(user.uid).set({ highScore });
     } else {
         localStorage.setItem('highScore', highScore);
     }
