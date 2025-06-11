@@ -30,6 +30,9 @@ let bricks = [];
 let powerUps = [];
 let particles = [];
 
+// Флаг, указывающий, запущен ли мяч
+let ballReleased = false;
+
 // Игровые переменные
 let score = 0;
 let level = 1;
@@ -310,11 +313,19 @@ function applyPowerUp(type) {
 
 // Сброс мяча
 function resetBall() {
-    ball.x = 400;
-    ball.y = 400;
-    ball.dx = (Math.random() > 0.5 ? 1 : -1) * 4;
-    ball.dy = -4;
+    ball.x = paddle.x + paddle.width / 2;
+    ball.y = paddle.y - ball.radius;
+    ball.dx = 0;
+    ball.dy = 0;
     ball.speed = 4;
+    ballReleased = false;
+}
+
+// Запуск мяча после нажатия пробела
+function launchBall() {
+    ball.dx = (Math.random() > 0.5 ? 1 : -1) * ball.speed;
+    ball.dy = -ball.speed;
+    ballReleased = true;
 }
 
 // Завершение уровня
@@ -438,8 +449,13 @@ function update() {
     }
 
     // Движение мяча
-    ball.x += ball.dx;
-    ball.y += ball.dy;
+    if (!ballReleased) {
+        ball.x = paddle.x + paddle.width / 2;
+        ball.y = paddle.y - ball.radius;
+    } else {
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+    }
 
     // Движение бонусов
     powerUps.forEach((powerUp, index) => {
@@ -462,7 +478,9 @@ function update() {
         }
     });
 
-    checkCollisions();
+    if (ballReleased) {
+        checkCollisions();
+    }
     updateUI();
 }
 
@@ -483,6 +501,9 @@ function gameLoop() {
 // Управление
 document.addEventListener('keydown', (e) => {
     keys[e.key] = true;
+    if (e.key === ' ' && !ballReleased && gameRunning) {
+        launchBall();
+    }
 });
 
 document.addEventListener('keyup', (e) => {
