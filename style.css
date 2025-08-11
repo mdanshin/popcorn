@@ -17,8 +17,9 @@ body {
 }
 
 #gameContainer {
-    width: 800px;
-    height: 600px;
+    width: 100%;
+    max-width: 800px;
+    aspect-ratio: 4 / 3;
     position: relative;
     border: 3px solid #00ffff;
     box-shadow: 0 0 30px #00ffff, inset 0 0 30px rgba(0, 255, 255, 0.1);
@@ -30,6 +31,7 @@ body {
     height: 100%;
     background: transparent;
     display: block;
+    touch-action: none;
 }
 
 #ui {
