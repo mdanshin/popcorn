@@ -628,6 +628,21 @@ document.addEventListener('keyup', (e) => {
     keys[e.key] = false;
 });
 
+// Сенсорное управление для мобильных устройств
+function handleTouch(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = ((touch.clientX - rect.left) / rect.width) * canvas.width;
+    paddle.x = Math.min(Math.max(x - paddle.width / 2, 0), canvas.width - paddle.width);
+    if (e.type === 'touchstart' && !ballReleased && gameRunning) {
+        launchBall();
+    }
+}
+
+document.addEventListener('touchstart', handleTouch, { passive: false });
+document.addEventListener('touchmove', handleTouch, { passive: false });
+
 // Функции управления игрой
 function startGame() {
     initAudio();
